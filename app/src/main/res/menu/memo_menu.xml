@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single" >
+    <item android:id="@+id/memo_menu_sortByM" android:title="@string/sortByM"/>
+    <item android:id="@+id/memo_menu_sortByC" android:title="@string/sortByC"/>
+    </group>
+    <item android:id="@+id/memo_menu_autosync" android:title="@string/autosync_str" android:checkable="true"/>
+    <item android:id="@+id/memo_menu_bin" android:title="云回收站"/>
+    <item android:id="@+id/memo_menu_logout" android:title="退出登录"/>
+</menu>

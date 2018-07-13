@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MyMemo</string>
+    <string name="title_activity_test">TestActivity</string>
+    <string name="sortByM">按修改日期排序</string>
+    <string name="sortByC">按创建日期排序</string>
+    <string name="autosync_str">自动同步</string>
+</resources>
