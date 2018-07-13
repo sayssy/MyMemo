@@ -27,6 +27,7 @@ import com.android.mymemo.volley.VolleyRequest;
 import com.android.volley.VolleyError;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -120,6 +121,7 @@ public class MemoInfoActivity extends AppCompatActivity {
                     if (checkTitle() && checkContent()) {
                         MemoDAOImpl mdi = new MemoDAOImpl(this);
                         mdi.insertMemo(memo);
+
                     }else{
                         break;
                     }

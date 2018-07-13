@@ -51,6 +51,7 @@ public class Memo {
         Calendar c = Calendar.getInstance();
         c.set(2000,0,1,0,0,0);
         this.notificationDate = c.getTime();
+        this.state = 1;
     }
 
     //update
@@ -123,5 +124,19 @@ public class Memo {
 
     public void setState(int state) {
         this.state = state;
+    }
+
+    @Override
+    public String toString() {
+        return "Memo{" +
+                "id='" + id + '\'' +
+                ", accID='" + accID + '\'' +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", createDate=" + createDate +
+                ", lastModifyDate=" + lastModifyDate +
+                ", notificationDate=" + notificationDate +
+                ", state=" + state +
+                '}';
     }
 }

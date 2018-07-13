@@ -52,7 +52,14 @@ public class MemoActivity extends AppCompatActivity {
         fab_refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                syncMemoFromLocal();
+                MemoDAOImpl mdi = new MemoDAOImpl(MemoActivity.this);
+                if (mdi.getAllMemos(null).isEmpty()){
+
+                    syncMemoFromCloud();
+                }else{
+                    syncMemoFromLocal();
+                }
+
             }
         });
 
@@ -123,30 +130,39 @@ public class MemoActivity extends AppCompatActivity {
         }else{
             if (accountDAOImpl.getAccountInfo().getAutoSync() == 1){
                 if (mdi.getAllMemos(null).isEmpty()){
+
                     syncMemoFromCloud();
                 }else{
                     syncMemoFromLocal();
                 }
 
             }
+            show();
         }
 
+    }
+
+    private void show(){
+        AccountDAOImpl adi = new AccountDAOImpl(this);
+        if (adi.isExisted()){
+            MemoDAOImpl mdi = new MemoDAOImpl(this);
+            memos.clear();
+            ArrayList<Memo> memoList = mdi.getAllMemos(adi.getAccountInfo().getArrangement());
+
+            memos.addAll(memoList);
+            memoAdapter.notifyDataSetChanged();
+
+        }
     }
 
     @Override
     protected void onResume() {
 
         AccountDAOImpl adi = new AccountDAOImpl(this);
-        if (adi.isExisted()){
-            MemoDAOImpl mdi = new MemoDAOImpl(this);
-            memos.clear();
-            memos.addAll(mdi.getAllMemos(adi.getAccountInfo().getArrangement()));
-            memoAdapter.notifyDataSetChanged();
-
-            if (adi.getAccountInfo().getAutoSync() == 1){
-                syncMemoFromLocal();
-            }
+        if (adi.isExisted() && adi.getAccountInfo().getAutoSync() == 1) {
+            syncMemoFromLocal();
         }
+        show();
         super.onResume();
     }
 
@@ -183,17 +199,13 @@ public class MemoActivity extends AppCompatActivity {
             case R.id.memo_menu_sortByM:
                 ai.setArrangement("M");
                 adi.updateAccountInfo(ai);
-                memos.clear();
-                memos.addAll(mdi.getAllMemos(ai.getArrangement()));
-                memoAdapter.notifyDataSetChanged();
+                show();
                 item.setChecked(true);
                 break;
             case R.id.memo_menu_sortByC:
                 ai.setArrangement("C");
                 adi.updateAccountInfo(ai);
-                memos.clear();
-                memos.addAll(mdi.getAllMemos(ai.getArrangement()));
-                memoAdapter.notifyDataSetChanged();
+                show();
                 item.setChecked(true);
                 break;
             case R.id.memo_menu_autosync:
@@ -212,7 +224,7 @@ public class MemoActivity extends AppCompatActivity {
                 break;
             case R.id.memo_menu_logout:
                 adi.deleteAccountInfo();
-                //退出登录时删除所有memo?//TODO
+                mdi.deleteAllMemos();
                 Intent intent = new Intent(MemoActivity.this,LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
@@ -227,7 +239,10 @@ public class MemoActivity extends AppCompatActivity {
         AccountDAOImpl adi = new AccountDAOImpl(this);
         String accid = adi.getAccountInfo().getAccount().getId();
         MemoDAOImpl mdi = new MemoDAOImpl(MemoActivity.this);
-        ArrayList<Memo> memoList = new ArrayList<Memo>(mdi.getAllMemos(null));
+        ArrayList<Memo> memoList = mdi.getAllMemos(null);
+
+
+
         VolleyRequest vr = new VolleyRequest();
 
         vr.synchronizeMemos(memoList, new VolleyCallback() {
@@ -237,8 +252,9 @@ public class MemoActivity extends AppCompatActivity {
                 Boolean b = Boolean.parseBoolean(result);
                 if (b){
                     Toast.makeText(MemoActivity.this,"同步成功",Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(MemoActivity.this,"同步失败",Toast.LENGTH_SHORT).show();
                 }
-                Toast.makeText(MemoActivity.this,"同步失败",Toast.LENGTH_SHORT).show();
             }
 
             @Override

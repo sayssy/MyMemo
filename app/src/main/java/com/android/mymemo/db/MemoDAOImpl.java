@@ -43,6 +43,14 @@ public class MemoDAOImpl implements MemoDAO {
     }
 
     @Override
+    public void deleteAllMemos() {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String sqlStatement= "delete from memo ";
+        db.execSQL(sqlStatement, new String[] {});
+        db.close();
+    }
+
+    @Override
     public void updateMemo(Memo memo) {
         SQLiteDatabase db = helper.getWritableDatabase();
         String sqlStatement= "update memo set title = ?, content = ?, lastModifyDate = ? where id = ?";
@@ -59,6 +67,7 @@ public class MemoDAOImpl implements MemoDAO {
         String sqlQueryStatement= "select * from memo where id = ?";
         Cursor cursors = db.rawQuery(sqlQueryStatement, new String[] {id});
         if(cursors.moveToNext()) {
+            memo = new Memo();
             memo.setId(cursors.getString(cursors.getColumnIndex("id")));
             memo.setAccID(cursors.getString(cursors.getColumnIndex("accID")));
             memo.setTitle(cursors.getString(cursors.getColumnIndex("title")));
@@ -78,8 +87,9 @@ public class MemoDAOImpl implements MemoDAO {
     }
 
     @Override
-    public List<Memo> getAllMemos(String sort_way) {
+    public ArrayList<Memo> getAllMemos(String sort_way) {
         String sort_sql = "";
+
         if (sort_way != null){
             if (sort_way.equals("M")){
                 sort_sql = " order by date(lastModifyDate) desc";
@@ -87,7 +97,8 @@ public class MemoDAOImpl implements MemoDAO {
                 sort_sql = " order by date(createDate) desc";
             }
         }
-        List<Memo> list = new ArrayList<Memo>();
+
+        ArrayList<Memo> list = new ArrayList<Memo>();
         SQLiteDatabase db = helper.getWritableDatabase();
         String sqlQueryStatement= "select * from memo where state = 1" + sort_sql;
         Cursor cursors = db.rawQuery(sqlQueryStatement, new String[]{});

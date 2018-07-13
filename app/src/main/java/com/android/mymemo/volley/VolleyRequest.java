@@ -23,6 +23,8 @@ public class VolleyRequest {
     //URL
     public static final String URL_BASE_ACCOUNT_SERVLET = "http://119.23.74.157:8080/AccountServlet";
     public static final String URL_BASE_MEMO_SERVLET = "http://119.23.74.157:8080/MemoServlet";
+    //public static final String URL_BASE_ACCOUNT_SERVLET = "http://192.168.1.115:8080/AccountServlet";
+    //public static final String URL_BASE_MEMO_SERVLET = "http://192.168.1.115:8080/MemoServlet";
 
     private static Gson gson = new GsonBuilder()
             .setDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -140,8 +142,8 @@ public class VolleyRequest {
         if (list == null) {
             list =  new ArrayList<Memo>();
         }
-        map.put("function", "updateMemo");
-        map.put("list ", gson.toJson(list));
+        map.put("function", "synchronizeMemos");
+        map.put("list", gson.toJson(list));
         VolleyUtil.getInstance().postString(URL_BASE_MEMO_SERVLET, map, response, error);
     }
 
