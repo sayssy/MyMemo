@@ -1,5 +1,6 @@
 package com.android.mymemo.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +21,10 @@ import android.widget.Toast;
 
 import com.android.mymemo.R;
 import com.android.mymemo.adapter.MemoAdapter;
+import com.android.mymemo.db.AccountDAOImpl;
+import com.android.mymemo.db.MemoDAOImpl;
+import com.android.mymemo.entity.Account;
+import com.android.mymemo.entity.AccountInfo;
 import com.android.mymemo.entity.Memo;
 import com.android.mymemo.volley.VolleyCallback;
 import com.android.mymemo.volley.VolleyRequest;
@@ -27,6 +33,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class MemoActivity extends AppCompatActivity {
@@ -37,6 +44,7 @@ public class MemoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memo);
+        init_config(getApplication());
 
         getSupportActionBar().setTitle("云备忘录");
         //刷新
@@ -44,7 +52,7 @@ public class MemoActivity extends AppCompatActivity {
         fab_refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MemoActivity.this,"刷新便签",Toast.LENGTH_SHORT).show();
+                syncMemoFromLocal();
             }
         });
 
@@ -97,67 +105,172 @@ public class MemoActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Memo memo = (Memo) listView.getItemAtPosition(position);
                 String memo_id = memo.getId();
-                Toast.makeText(MemoActivity.this,memo_id,Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MemoActivity.this,MemoInfoActivity.class);
+                intent.putExtra("function","update");
+                intent.putExtra("memo_id",memo_id);
+                startActivity(intent);
+
             }
         });
         //addMemo();
+        //检查是否已经登录
+        AccountDAOImpl accountDAOImpl = new AccountDAOImpl(this);
+        MemoDAOImpl mdi = new MemoDAOImpl(this);
+        if (!accountDAOImpl.isExisted()){
+            Intent intent = new Intent(MemoActivity.this,LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }else{
+            if (accountDAOImpl.getAccountInfo().getAutoSync() == 1){
+                if (mdi.getAllMemos(null).isEmpty()){
+                    syncMemoFromCloud();
+                }else{
+                    syncMemoFromLocal();
+                }
+
+            }
+        }
+
     }
 
     @Override
     protected void onResume() {
-        syncMemoFromCloud();
+
+        AccountDAOImpl adi = new AccountDAOImpl(this);
+        if (adi.isExisted()){
+            MemoDAOImpl mdi = new MemoDAOImpl(this);
+            memos.clear();
+            memos.addAll(mdi.getAllMemos(adi.getAccountInfo().getArrangement()));
+            memoAdapter.notifyDataSetChanged();
+
+            if (adi.getAccountInfo().getAutoSync() == 1){
+                syncMemoFromLocal();
+            }
+        }
         super.onResume();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.memo_menu,menu); //通过getMenuInflater()方法得到MenuInflater对象，再调用它的inflate()方法就可以给当前活动创建菜单了，第一个参数：用于指定我们通过哪一个资源文件来创建菜单；第二个参数：用于指定我们的菜单项将添加到哪一个Menu对象当中。
+        getMenuInflater().inflate(R.menu.memo_menu,menu);
+
+        AccountDAOImpl adi = new AccountDAOImpl(this);
+        if (adi.isExisted()) {
+            AccountInfo ai = adi.getAccountInfo();
+            String sort_way = ai.getArrangement();
+            int autosync = ai.getAutoSync();
+
+            if (sort_way.equals("M")) {
+                menu.findItem(R.id.memo_menu_sortByM).setChecked(true);
+            } else if (sort_way.equals("C")) {
+                menu.findItem(R.id.memo_menu_sortByC).setChecked(true);
+            }
+            if (autosync == 1) {
+                menu.findItem(R.id.memo_menu_autosync).setChecked(true);
+            } else {
+                menu.findItem(R.id.memo_menu_autosync).setChecked(false);
+            }
+        }
         return true; // true：允许创建的菜单显示出来，false：创建的菜单将无法显示。
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
+        MemoDAOImpl mdi = new MemoDAOImpl(this);
+        AccountDAOImpl adi = new AccountDAOImpl(this);
+        AccountInfo ai = adi.getAccountInfo();
         switch (item.getItemId()){
             case R.id.memo_menu_sortByM:
+                ai.setArrangement("M");
+                adi.updateAccountInfo(ai);
+                memos.clear();
+                memos.addAll(mdi.getAllMemos(ai.getArrangement()));
+                memoAdapter.notifyDataSetChanged();
                 item.setChecked(true);
                 break;
             case R.id.memo_menu_sortByC:
+                ai.setArrangement("C");
+                adi.updateAccountInfo(ai);
+                memos.clear();
+                memos.addAll(mdi.getAllMemos(ai.getArrangement()));
+                memoAdapter.notifyDataSetChanged();
                 item.setChecked(true);
                 break;
             case R.id.memo_menu_autosync:
-                item.setChecked(!item.isChecked());
+                if (ai.getAutoSync() == 1){
+                    ai.setAutoSync(0);
+                    adi.updateAccountInfo(ai);
+                    item.setChecked(false);
+                }else{
+                    ai.setAutoSync(1);
+                    adi.updateAccountInfo(ai);
+                    item.setChecked(true);
+                }
                 break;
             case R.id.memo_menu_bin:
-
+                //TODO
                 break;
             case R.id.memo_menu_logout:
-                Toast.makeText(this, "你点击了 4！", Toast.LENGTH_SHORT).show();
+                adi.deleteAccountInfo();
+                //退出登录时删除所有memo?//TODO
+                Intent intent = new Intent(MemoActivity.this,LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
                 break;
-
-
             default:
                 break;
         }
 
         return true;
     }
+    private void syncMemoFromLocal(){
+        AccountDAOImpl adi = new AccountDAOImpl(this);
+        String accid = adi.getAccountInfo().getAccount().getId();
+        MemoDAOImpl mdi = new MemoDAOImpl(MemoActivity.this);
+        ArrayList<Memo> memoList = new ArrayList<Memo>(mdi.getAllMemos(null));
+        VolleyRequest vr = new VolleyRequest();
 
+        vr.synchronizeMemos(memoList, new VolleyCallback() {
+            @Override
+            public void onSuccess(String result) {
+                Log.d("====","result="+result);
+                Boolean b = Boolean.parseBoolean(result);
+                if (b){
+                    Toast.makeText(MemoActivity.this,"同步成功",Toast.LENGTH_SHORT).show();
+                }
+                Toast.makeText(MemoActivity.this,"同步失败",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(VolleyError volleyError) {
+                Toast.makeText(MemoActivity.this,"同步至服务器失败，网络错误",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
 
     private void syncMemoFromCloud(){
 
         VolleyRequest vr = new VolleyRequest();
-        vr.getAllMyMemos("ssy", new VolleyCallback() { //TODO
+        AccountDAOImpl adi = new AccountDAOImpl(this);
+        String accid = adi.getAccountInfo().getAccount().getId();
+        vr.getAllMyMemos(accid, new VolleyCallback() {
             @Override
             public void onSuccess(String result) {
-                memos.clear();
-                memos.addAll(VolleyRequest.parseJsonArray(result));
+
+                ArrayList<Memo> cloud_memos = VolleyRequest.parseJsonArray(result);
+                MemoDAOImpl mdi = new MemoDAOImpl(MemoActivity.this);
+                if (cloud_memos != null){
+                    for (Memo memo : cloud_memos){
+                        mdi.insertMemo(memo);
+                    }
+                }
+
             }
 
             @Override
             public void onError(VolleyError volleyError) {
-                Toast.makeText(MemoActivity.this,"自动同步失败，网络错误",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MemoActivity.this,"从服务器同步失败，网络错误",Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -166,6 +279,9 @@ public class MemoActivity extends AppCompatActivity {
 
 
 
+    }
+    public void init_config(Context context) {
+        VolleyUtil.getInstance().init(context);
     }
 
 }

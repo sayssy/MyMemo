@@ -15,7 +15,7 @@ import java.util.List;
 
 public class MemoDAOImpl implements MemoDAO {
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-DD HH:MM:SS");
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private DataBaseHelper helper = null;
     public MemoDAOImpl(Context context) {
         this.helper = new DataBaseHelper(context);
@@ -25,7 +25,7 @@ public class MemoDAOImpl implements MemoDAO {
     public void insertMemo(Memo memo) {
         SQLiteDatabase db = helper.getWritableDatabase();
         String sqlStatement= "insert into memo(id, accID, title, content," +
-                " createDate, lastModifyDate, notificationDate, state) values (?, ?, ?, ?, ?, ?, ?)";
+                " createDate, lastModifyDate, notificationDate, state) values (?, ?, ?, ?, ?, ?, ?, ?)";
         db.execSQL(sqlStatement,
                 new Object[] {memo.getId(), memo.getAccID(),
                         memo.getTitle(), memo.getContent(),
@@ -38,7 +38,7 @@ public class MemoDAOImpl implements MemoDAO {
     public void deleteMemo(String id) {
         SQLiteDatabase db = helper.getWritableDatabase();
         String sqlStatement= "update memo set state = 0 where id = ?";
-        db.execSQL(sqlStatement, new Object[] {id});
+        db.execSQL(sqlStatement, new String[] {id});
         db.close();
     }
 
@@ -78,10 +78,18 @@ public class MemoDAOImpl implements MemoDAO {
     }
 
     @Override
-    public List<Memo> getAllMemos() {
+    public List<Memo> getAllMemos(String sort_way) {
+        String sort_sql = "";
+        if (sort_way != null){
+            if (sort_way.equals("M")){
+                sort_sql = " order by date(lastModifyDate) desc";
+            }else if (sort_way.equals("C")){
+                sort_sql = " order by date(createDate) desc";
+            }
+        }
         List<Memo> list = new ArrayList<Memo>();
         SQLiteDatabase db = helper.getWritableDatabase();
-        String sqlQueryStatement= "select * from memo";
+        String sqlQueryStatement= "select * from memo where state = 1" + sort_sql;
         Cursor cursors = db.rawQuery(sqlQueryStatement, new String[]{});
         while (cursors.moveToNext()) {
             Memo memo = new Memo();

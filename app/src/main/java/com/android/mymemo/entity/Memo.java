@@ -48,6 +48,9 @@ public class Memo {
         this.content = content;
         this.createDate = date;
         this.lastModifyDate = date;
+        Calendar c = Calendar.getInstance();
+        c.set(2000,0,1,0,0,0);
+        this.notificationDate = c.getTime();
     }
 
     //update

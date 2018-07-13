@@ -13,7 +13,10 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.android.mymemo.R;
+import com.android.mymemo.db.AccountDAOImpl;
+import com.android.mymemo.db.AccountInfoDAO;
 import com.android.mymemo.entity.Account;
+import com.android.mymemo.entity.AccountInfo;
 import com.android.mymemo.volley.VolleyCallback;
 import com.android.mymemo.volley.VolleyRequest;
 import com.android.mymemo.volley.VolleyUtil;
@@ -28,8 +31,16 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        init_config(getApplication());
+
         getSupportActionBar().setTitle("登录");
+        //检查是否已经登录
+        AccountDAOImpl accountDAOImpl = new AccountDAOImpl(this);
+        if (accountDAOImpl.isExisted()){
+            Intent intent = new Intent(LoginActivity.this,MemoActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+
         //登录功能
         Button login_btn = findViewById(R.id.login_loginbtn);
         login_btn.setOnClickListener(new View.OnClickListener() {
@@ -43,6 +54,8 @@ public class LoginActivity extends AppCompatActivity {
                             Account account = new Gson().fromJson(result,Account.class);
                             if (account != null){
                                 Toast.makeText(LoginActivity.this,"登录成功",Toast.LENGTH_SHORT).show();
+                                AccountDAOImpl adi = new AccountDAOImpl(LoginActivity.this);
+                                adi.insertAccountInfo(new AccountInfo(account,"M",1));
                                 Intent intent = new Intent(LoginActivity.this,MemoActivity.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
@@ -93,7 +106,5 @@ public class LoginActivity extends AppCompatActivity {
         return false;
     }
 
-    public void init_config(Context context) {
-        VolleyUtil.getInstance().init(context);
-    }
+
 }

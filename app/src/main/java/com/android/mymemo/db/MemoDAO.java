@@ -17,7 +17,7 @@ public interface MemoDAO {
 
     public Memo getSingleMemo(String id);
 
-    public List<Memo> getAllMemos();
+    public List<Memo> getAllMemos(String sort_way);
 
     public boolean isExists(String id);
 
