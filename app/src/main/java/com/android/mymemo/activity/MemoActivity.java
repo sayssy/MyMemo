@@ -4,11 +4,15 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -26,7 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MemoActivity extends AppCompatActivity {
-
+    private ArrayList<Memo> memos = new ArrayList<Memo>();
+    private MemoAdapter memoAdapter;
+    private ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +60,46 @@ public class MemoActivity extends AppCompatActivity {
             }
         });
 
+        //搜索
+        EditText et_search = findViewById(R.id.memo_search_keyword);
+        et_search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                for (Memo memo : memos){
+                    if (TextUtils.isEmpty(s) || memo.getTitle().contains(s) || memo.getContent().contains(s)){
+                        memo.visible = true;
+                    }else{
+                        memo.visible = false;
+                    }
+                    memoAdapter.notifyDataSetChanged();
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        //备忘录列表
+        memoAdapter = new MemoAdapter(
+                MemoActivity.this, R.layout.memo_layout, memos);
+        listView = findViewById(R.id.list_view);
+        listView.setAdapter(memoAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Memo memo = (Memo) listView.getItemAtPosition(position);
+                String memo_id = memo.getId();
+                Toast.makeText(MemoActivity.this,memo_id,Toast.LENGTH_SHORT).show();
+            }
+        });
         //addMemo();
     }
 
@@ -101,24 +146,13 @@ public class MemoActivity extends AppCompatActivity {
 
 
     private void syncMemoFromCloud(){
-        final ListView listView = findViewById(R.id.list_view);
+
         VolleyRequest vr = new VolleyRequest();
-        vr.getAllMyMemos("ssy", new VolleyCallback() {
+        vr.getAllMyMemos("ssy", new VolleyCallback() { //TODO
             @Override
             public void onSuccess(String result) {
-
-                ArrayList<Memo> memos = VolleyRequest.parseJsonArray(result);
-                MemoAdapter memoAdapter = new MemoAdapter(
-                        MemoActivity.this, R.layout.memo_layout, memos);
-                listView.setAdapter(memoAdapter);
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Memo memo = (Memo) listView.getItemAtPosition(position);
-                        String memo_id = memo.getId();
-                        Toast.makeText(MemoActivity.this,memo_id,Toast.LENGTH_SHORT).show();
-                    }
-                });
+                memos.clear();
+                memos.addAll(VolleyRequest.parseJsonArray(result));
             }
 
             @Override

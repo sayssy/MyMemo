@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.mymemo.R;
@@ -33,8 +34,13 @@ public class MemoAdapter extends ArrayAdapter {
         tv_title.setText(memo.getTitle());
         int clength = memo.getContent().length();
         int length = clength > 10 ? 10 : clength;
-        tv_content.setText(memo.getContent().substring(0,clength)+"...");
+        tv_content.setText(memo.getContent().substring(0,clength));
         tv_date.setText(memo.getLastModifyDate().toLocaleString());
+        if (!memo.visible){
+            view.setVisibility(RelativeLayout.GONE);
+        }else{
+            view.setVisibility(RelativeLayout.VISIBLE);
+        }
         return view;
     }
 }

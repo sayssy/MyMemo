@@ -18,7 +18,7 @@ public class Memo {
     private Date lastModifyDate;
     private Date notificationDate;
     private int state;
-
+    public transient boolean visible = true;
     public Memo() {
     }
 
