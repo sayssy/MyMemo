@@ -25,7 +25,7 @@ public class VolleyRequest {
     public static final String URL_BASE_MEMO_SERVLET = "http://119.23.74.157:8080/MemoServlet";
 
     private static Gson gson = new GsonBuilder()
-            .setDateFormat("yyyy-MM-dd HH:mm:ss:SSS")
+            .setDateFormat("yyyy-MM-dd HH:mm:ss")
             .create();
     //params pairs
     private Map<String, String> map = new HashMap<String, String>();
@@ -201,6 +201,7 @@ public class VolleyRequest {
      * @return
      */
     public static ArrayList<Memo> parseJsonArray(String json) {
+        Log.d("JSON",json);
         JsonParser parser = new JsonParser();
         if (json == null || json.length() < 1) {
             json = "[]";

@@ -64,6 +64,7 @@ public class StringRequest extends Request<String> {
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         String parsed;
         try {
+            //parsed = new String(response.data, "UTF-8");
             parsed = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
         } catch (UnsupportedEncodingException e) {
             parsed = new String(response.data);

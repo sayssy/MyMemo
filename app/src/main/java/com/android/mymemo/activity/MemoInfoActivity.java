@@ -34,6 +34,9 @@ public class MemoInfoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memo_info);
+
+        getSupportActionBar().setTitle("信息");
+
         et_title = findViewById(R.id.info_title);
         tv_wc = findViewById(R.id.info_word_count);
         et_content = findViewById(R.id.info_content);

@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
+    android {compileOptions.encoding = "utf8"}
     defaultConfig {
         applicationId "com.android.mymemo"
         minSdkVersion 15

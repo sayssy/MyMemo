@@ -32,7 +32,7 @@ public class MemoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memo);
 
-
+        getSupportActionBar().setTitle("云备忘录");
         //刷新
         FloatingActionButton fab_refresh = (FloatingActionButton) findViewById(R.id.fab_refresh);
         fab_refresh.setOnClickListener(new View.OnClickListener() {

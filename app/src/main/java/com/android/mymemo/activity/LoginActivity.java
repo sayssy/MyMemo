@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.android.mymemo.R;
 import com.android.mymemo.entity.Account;
@@ -28,6 +29,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         init_config(getApplication());
+        getSupportActionBar().setTitle("登录");
         //登录功能
         Button login_btn = findViewById(R.id.login_loginbtn);
         login_btn.setOnClickListener(new View.OnClickListener() {

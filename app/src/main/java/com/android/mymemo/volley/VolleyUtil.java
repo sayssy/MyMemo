@@ -3,12 +3,15 @@ package com.android.mymemo.volley;
 import android.content.Context;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 /**
@@ -43,7 +46,21 @@ public class VolleyUtil {
      */
     public void getString(String url, Response.Listener<String> success, Response.ErrorListener error) {
         StringRequest stringRequest
-                = new StringRequest(Request.Method.GET, url, success, error);
+                = new StringRequest(Request.Method.GET, url, success, error){
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                String parsed;
+                try {
+                    //parsed = new String(response.data, "UTF-8");
+                    parsed = new String(response.data, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    parsed = new String(response.data);
+                }
+                return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response));
+            }
+
+        };
+
         stringRequest.setTag("Request");
         requestQueue.add(stringRequest);
     }
@@ -61,6 +78,17 @@ public class VolleyUtil {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 return map;
+            }
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                String parsed;
+                try {
+                    //parsed = new String(response.data, "UTF-8");
+                    parsed = new String(response.data, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    parsed = new String(response.data);
+                }
+                return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response));
             }
         };
         stringRequest.setTag("Request");

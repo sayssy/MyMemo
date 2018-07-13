@@ -29,6 +29,7 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        getSupportActionBar().setTitle("注册");
         Button register_btn = findViewById(R.id.register_btn);
         register_btn.setOnClickListener(new View.OnClickListener() {
             @Override
