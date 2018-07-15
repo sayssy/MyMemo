@@ -92,9 +92,9 @@ public class MemoDAOImpl implements MemoDAO {
 
         if (sort_way != null){
             if (sort_way.equals("M")){
-                sort_sql = " order by date(lastModifyDate) desc";
+                sort_sql = " order by datetime(lastModifyDate) desc";
             }else if (sort_way.equals("C")){
-                sort_sql = " order by date(createDate) desc";
+                sort_sql = " order by datetime(createDate) desc";
             }
         }
 

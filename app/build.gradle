@@ -21,8 +21,8 @@ android {
 
 dependencies {
     implementation 'com.android.support:design:27.1.1'
-    compile project(':volley')
-    compile 'ren.qinc.edit:lib:0.0.5'
+    implementation project(':volley')
+    implementation 'ren.qinc.edit:lib:0.0.5'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'

@@ -67,9 +67,9 @@ public class MemoInfoActivity extends AppCompatActivity {
             }
         };
         if (function.equals("create")) {
-            et_title.setText("标题");
+            et_title.setHint("标题");
             tv_wc.setText(DEFAULT_TIPS.length()+"");
-            mPerformEdit.setDefaultText(DEFAULT_TIPS);
+            et_content.setHint(DEFAULT_TIPS);
         } else if (function.equals("update")){
             String memo_id = intent.getStringExtra("memo_id");
             MemoDAOImpl mdi = new MemoDAOImpl(this);

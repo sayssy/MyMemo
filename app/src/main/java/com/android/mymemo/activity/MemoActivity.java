@@ -44,6 +44,7 @@ public class MemoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memo);
+
         init_config(getApplication());
 
         getSupportActionBar().setTitle("云备忘录");
@@ -54,9 +55,10 @@ public class MemoActivity extends AppCompatActivity {
             public void onClick(View view) {
                 MemoDAOImpl mdi = new MemoDAOImpl(MemoActivity.this);
                 if (mdi.getAllMemos(null).isEmpty()){
-
+                    //如果本地数据库为空，就从云端拉取数据
                     syncMemoFromCloud();
                 }else{
+                    //否则从云端同步到本地
                     syncMemoFromLocal();
                 }
 
@@ -116,10 +118,9 @@ public class MemoActivity extends AppCompatActivity {
                 intent.putExtra("function","update");
                 intent.putExtra("memo_id",memo_id);
                 startActivity(intent);
-
             }
         });
-        //addMemo();
+
         //检查是否已经登录
         AccountDAOImpl accountDAOImpl = new AccountDAOImpl(this);
         MemoDAOImpl mdi = new MemoDAOImpl(this);
@@ -137,8 +138,8 @@ public class MemoActivity extends AppCompatActivity {
                 }
 
             }
-            show();
         }
+
 
     }
 
@@ -148,7 +149,6 @@ public class MemoActivity extends AppCompatActivity {
             MemoDAOImpl mdi = new MemoDAOImpl(this);
             memos.clear();
             ArrayList<Memo> memoList = mdi.getAllMemos(adi.getAccountInfo().getArrangement());
-
             memos.addAll(memoList);
             memoAdapter.notifyDataSetChanged();
 
@@ -158,11 +158,13 @@ public class MemoActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
 
+
         AccountDAOImpl adi = new AccountDAOImpl(this);
         if (adi.isExisted() && adi.getAccountInfo().getAutoSync() == 1) {
             syncMemoFromLocal();
         }
         show();
+
         super.onResume();
     }
 
@@ -241,8 +243,6 @@ public class MemoActivity extends AppCompatActivity {
         MemoDAOImpl mdi = new MemoDAOImpl(MemoActivity.this);
         ArrayList<Memo> memoList = mdi.getAllMemos(null);
 
-
-
         VolleyRequest vr = new VolleyRequest();
 
         vr.synchronizeMemos(memoList, new VolleyCallback() {
@@ -281,6 +281,7 @@ public class MemoActivity extends AppCompatActivity {
                         mdi.insertMemo(memo);
                     }
                 }
+                show();
 
             }
 
