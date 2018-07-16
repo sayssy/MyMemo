@@ -20,7 +20,7 @@ public interface MemoDAO {
 
     public Memo getSingleMemo(String id);
 
-    public ArrayList<Memo> getAllMemos(String sort_way);
+    public ArrayList<Memo> getAllMemos(String sort_way,boolean isAll);
 
     public boolean isExists(String id);
 

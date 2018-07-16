@@ -24,7 +24,7 @@ public class MemoDAOImpl implements MemoDAO {
     @Override
     public void insertMemo(Memo memo) {
         SQLiteDatabase db = helper.getWritableDatabase();
-        String sqlStatement= "insert into memo(id, accID, title, content," +
+        String sqlStatement= "replace into memo(id, accID, title, content," +
                 " createDate, lastModifyDate, notificationDate, state) values (?, ?, ?, ?, ?, ?, ?, ?)";
         db.execSQL(sqlStatement,
                 new Object[] {memo.getId(), memo.getAccID(),
@@ -87,9 +87,9 @@ public class MemoDAOImpl implements MemoDAO {
     }
 
     @Override
-    public ArrayList<Memo> getAllMemos(String sort_way) {
+    public ArrayList<Memo> getAllMemos(String sort_way ,boolean isAll) {
         String sort_sql = "";
-
+        StringBuilder sb = new StringBuilder("select * from memo");
         if (sort_way != null){
             if (sort_way.equals("M")){
                 sort_sql = " order by datetime(lastModifyDate) desc";
@@ -97,10 +97,13 @@ public class MemoDAOImpl implements MemoDAO {
                 sort_sql = " order by datetime(createDate) desc";
             }
         }
+        if (!isAll){
+            sb.append(" where state = 1 ");
+        }
 
         ArrayList<Memo> list = new ArrayList<Memo>();
         SQLiteDatabase db = helper.getWritableDatabase();
-        String sqlQueryStatement= "select * from memo where state = 1" + sort_sql;
+        String sqlQueryStatement= sb.toString() + sort_sql;
         Cursor cursors = db.rawQuery(sqlQueryStatement, new String[]{});
         while (cursors.moveToNext()) {
             Memo memo = new Memo();

@@ -134,6 +134,7 @@ public class MemoInfoActivity extends AppCompatActivity {
                         break;
                     }
                 }
+                MemoActivity.updateData();
                 Intent intent = new Intent(MemoInfoActivity.this,MemoActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
@@ -168,6 +169,7 @@ public class MemoInfoActivity extends AppCompatActivity {
             case R.id.menu_info_del:
                 MemoDAOImpl mdi = new MemoDAOImpl(this);
                 mdi.deleteMemo(current_memo.getId());
+                MemoActivity.updateData();
                 Intent intent2 = new Intent(MemoInfoActivity.this,MemoActivity.class);
                 intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent2);

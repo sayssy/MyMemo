@@ -9,13 +9,12 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.MonthDisplayHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -23,23 +22,26 @@ import com.android.mymemo.R;
 import com.android.mymemo.adapter.MemoAdapter;
 import com.android.mymemo.db.AccountDAOImpl;
 import com.android.mymemo.db.MemoDAOImpl;
-import com.android.mymemo.entity.Account;
 import com.android.mymemo.entity.AccountInfo;
 import com.android.mymemo.entity.Memo;
+import com.android.mymemo.utility.DataUpdate;
 import com.android.mymemo.volley.VolleyCallback;
 import com.android.mymemo.volley.VolleyRequest;
 import com.android.mymemo.volley.VolleyUtil;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 public class MemoActivity extends AppCompatActivity {
     private ArrayList<Memo> memos = new ArrayList<Memo>();
     private MemoAdapter memoAdapter;
     private ListView listView;
+    private static DataUpdate dataUpdate = new DataUpdate(false);
+
+    public static void updateData(){
+        dataUpdate.setDataUpdated(true);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +56,7 @@ public class MemoActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 MemoDAOImpl mdi = new MemoDAOImpl(MemoActivity.this);
-                if (mdi.getAllMemos(null).isEmpty()){
+                if (mdi.getAllMemos(null,true).isEmpty()){
                     //如果本地数据库为空，就从云端拉取数据
                     syncMemoFromCloud();
                 }else{
@@ -121,24 +123,7 @@ public class MemoActivity extends AppCompatActivity {
             }
         });
 
-        //检查是否已经登录
-        AccountDAOImpl accountDAOImpl = new AccountDAOImpl(this);
-        MemoDAOImpl mdi = new MemoDAOImpl(this);
-        if (!accountDAOImpl.isExisted()){
-            Intent intent = new Intent(MemoActivity.this,LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        }else{
-            if (accountDAOImpl.getAccountInfo().getAutoSync() == 1){
-                if (mdi.getAllMemos(null).isEmpty()){
 
-                    syncMemoFromCloud();
-                }else{
-                    syncMemoFromLocal();
-                }
-
-            }
-        }
 
 
     }
@@ -148,23 +133,34 @@ public class MemoActivity extends AppCompatActivity {
         if (adi.isExisted()){
             MemoDAOImpl mdi = new MemoDAOImpl(this);
             memos.clear();
-            ArrayList<Memo> memoList = mdi.getAllMemos(adi.getAccountInfo().getArrangement());
+            ArrayList<Memo> memoList = mdi.getAllMemos(adi.getAccountInfo().getArrangement(),false);
             memos.addAll(memoList);
             memoAdapter.notifyDataSetChanged();
-
         }
     }
 
     @Override
     protected void onResume() {
 
+        if (dataUpdate.isDataUpdated()) {
+            AccountDAOImpl adi = new AccountDAOImpl(this);
+            MemoDAOImpl mdi = new MemoDAOImpl(this);
+            if (adi.isExisted()) {
+                if (adi.getAccountInfo().getAutoSync() == 1) {
+                    if (mdi.getAllMemos(null, true).isEmpty()) {
+                        syncMemoFromCloud();
+                    } else {
+                        syncMemoFromLocal();
+                    }
+                }
+                show();
+            }else{
+                Intent intent = new Intent(MemoActivity.this,LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
 
-        AccountDAOImpl adi = new AccountDAOImpl(this);
-        if (adi.isExisted() && adi.getAccountInfo().getAutoSync() == 1) {
-            syncMemoFromLocal();
         }
-        show();
-
         super.onResume();
     }
 
@@ -238,10 +234,8 @@ public class MemoActivity extends AppCompatActivity {
         return true;
     }
     private void syncMemoFromLocal(){
-        AccountDAOImpl adi = new AccountDAOImpl(this);
-        String accid = adi.getAccountInfo().getAccount().getId();
         MemoDAOImpl mdi = new MemoDAOImpl(MemoActivity.this);
-        ArrayList<Memo> memoList = mdi.getAllMemos(null);
+        ArrayList<Memo> memoList = mdi.getAllMemos(null,true);
 
         VolleyRequest vr = new VolleyRequest();
 
@@ -276,11 +270,12 @@ public class MemoActivity extends AppCompatActivity {
 
                 ArrayList<Memo> cloud_memos = VolleyRequest.parseJsonArray(result);
                 MemoDAOImpl mdi = new MemoDAOImpl(MemoActivity.this);
-                if (cloud_memos != null){
+                if (cloud_memos != null && !cloud_memos.isEmpty()){
                     for (Memo memo : cloud_memos){
                         mdi.insertMemo(memo);
                     }
                 }
+                Toast.makeText(MemoActivity.this,"从服务器拉取数据成功",Toast.LENGTH_SHORT).show();
                 show();
 
             }
