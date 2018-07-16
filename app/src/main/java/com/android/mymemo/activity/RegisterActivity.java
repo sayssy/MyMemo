@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.BoringLayout;
 import android.text.TextUtils;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,6 +31,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         getSupportActionBar().setTitle("注册");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Button register_btn = findViewById(R.id.register_btn);
         register_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,6 +88,11 @@ public class RegisterActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
     }
 
 

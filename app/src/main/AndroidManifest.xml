@@ -3,16 +3,19 @@
     package="com.android.mymemo">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/logo_round"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.LoginActivity"></activity>
-        <activity android:name=".activity.RegisterActivity" />
+        <activity android:name=".activity.LoginActivity" />
+        <activity
+            android:name=".activity.RegisterActivity"
+            android:parentActivityName=".activity.LoginActivity"/>
         <activity android:name=".activity.MemoActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,8 +23,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.MemoInfoActivity" />
-        <activity android:name=".activity.CloudBinActivity"></activity>
+        <activity
+            android:name=".activity.MemoInfoActivity"
+            android:parentActivityName=".activity.MemoActivity"/>
+        <activity
+            android:name=".activity.CloudBinActivity"
+            android:parentActivityName=".activity.MemoActivity"/>
+
+        <service
+            android:name=".service.NtService"
+            android:enabled="true"></service>
+        <receiver
+            android:name=".service.AlarmReceiver"
+            android:process=":remote" >
+        </receiver>
     </application>
 
 </manifest>

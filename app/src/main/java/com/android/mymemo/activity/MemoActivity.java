@@ -2,6 +2,7 @@ package com.android.mymemo.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.util.MonthDisplayHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -24,6 +26,7 @@ import com.android.mymemo.db.AccountDAOImpl;
 import com.android.mymemo.db.MemoDAOImpl;
 import com.android.mymemo.entity.AccountInfo;
 import com.android.mymemo.entity.Memo;
+import com.android.mymemo.service.NtService;
 import com.android.mymemo.utility.DataUpdate;
 import com.android.mymemo.volley.VolleyCallback;
 import com.android.mymemo.volley.VolleyRequest;
@@ -47,6 +50,8 @@ public class MemoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memo);
 
+
+
         init_config(getApplication());
 
         getSupportActionBar().setTitle("云备忘录");
@@ -60,8 +65,9 @@ public class MemoActivity extends AppCompatActivity {
                     //如果本地数据库为空，就从云端拉取数据
                     syncMemoFromCloud();
                 }else{
-                    //否则从云端同步到本地
+                    //否则从本地同步至云端
                     syncMemoFromLocal();
+                    show();
                 }
 
             }
@@ -129,7 +135,12 @@ public class MemoActivity extends AppCompatActivity {
             Intent intent = new Intent(MemoActivity.this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+        }else{
+           Intent intent_serv = new Intent(this, NtService.class);
+           startService(intent_serv);
         }
+
+        MemoActivity.updateData();
 
 
 
@@ -289,9 +300,6 @@ public class MemoActivity extends AppCompatActivity {
                 Toast.makeText(MemoActivity.this,"从服务器同步失败，网络错误",Toast.LENGTH_SHORT).show();
             }
         });
-
-
-
 
 
 

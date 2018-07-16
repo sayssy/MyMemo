@@ -56,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Toast.makeText(LoginActivity.this,"登录成功",Toast.LENGTH_SHORT).show();
                                 AccountDAOImpl adi = new AccountDAOImpl(LoginActivity.this);
                                 adi.insertAccountInfo(new AccountInfo(account,"M",1));
-                                MemoActivity.updateData();
+                                //MemoActivity.updateData();
                                 Intent intent = new Intent(LoginActivity.this,MemoActivity.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);

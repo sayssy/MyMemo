@@ -24,6 +24,7 @@ import com.android.mymemo.db.AccountDAOImpl;
 import com.android.mymemo.db.MemoDAOImpl;
 import com.android.mymemo.dialog.TimePickerDialog;
 import com.android.mymemo.entity.Memo;
+import com.android.mymemo.service.NtService;
 import com.android.mymemo.volley.VolleyCallback;
 import com.android.mymemo.volley.VolleyRequest;
 import com.android.volley.VolleyError;
@@ -44,14 +45,15 @@ public class MemoInfoActivity extends AppCompatActivity {
     private final String DEFAULT_TIPS = "在此输入内容...";
     private String function;
     private TimePickerDialog mTimePickerDialog;
+    private String memo_id;
     private Memo current_memo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memo_info);
 
-        getSupportActionBar().setTitle("信息");
-
+        getSupportActionBar().setTitle("");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         et_title = findViewById(R.id.info_title);
         tv_wc = findViewById(R.id.info_word_count);
@@ -59,6 +61,8 @@ public class MemoInfoActivity extends AppCompatActivity {
         et_content = findViewById(R.id.info_content);
         Intent intent = getIntent();
         function = intent.getStringExtra("function");
+        memo_id = intent.getStringExtra("memo_id");
+
 
         mPerformEdit = new PerformEdit(et_content) {
             @Override
@@ -73,7 +77,7 @@ public class MemoInfoActivity extends AppCompatActivity {
             tv_wc.setText(DEFAULT_TIPS.length()+"");
             et_content.setHint(DEFAULT_TIPS);
         } else if (function.equals("update")){
-            String memo_id = intent.getStringExtra("memo_id");
+
             MemoDAOImpl mdi = new MemoDAOImpl(this);
 
             current_memo = mdi.getSingleMemo(memo_id);
@@ -198,7 +202,7 @@ public class MemoInfoActivity extends AppCompatActivity {
 
         }
 
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     private void setNDate(){
@@ -218,7 +222,14 @@ public class MemoInfoActivity extends AppCompatActivity {
                 current_memo.setNotificationDate(date);
                 MemoDAOImpl mdi = new MemoDAOImpl(MemoInfoActivity.this);
                 mdi.setNotificationDate(current_memo.getId(),date);
+                MemoActivity.updateData();
 
+                Intent intent_serv = new Intent(MemoInfoActivity.this, NtService.class);
+                startService(intent_serv);
+                Date now = Calendar.getInstance().getTime();
+                long tmp = (date.getTime() - now.getTime())/1000;
+                String duration = tmp / 1440 + "时" +(tmp / 60) % 60 + "分" + tmp % 60 + "秒";
+                Toast.makeText(MemoInfoActivity.this,"设置提醒成功\n将在"+ duration +"后提醒",Toast.LENGTH_SHORT).show();
             }
 
             @Override

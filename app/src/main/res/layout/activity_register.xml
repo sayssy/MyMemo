@@ -4,24 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
     tools:context=".activity.RegisterActivity">
-
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/welcome"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="34dp"
-        tools:layout_editor_absoluteY="0dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="422dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="48dp"
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView3">
+        app:layout_constraintTop_toTopOf="parent">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="账号注册"
+            android:textSize="24dp"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -38,10 +39,9 @@
 
             <EditText
                 android:id="@+id/register_id"
-                android:layout_width="219dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/edit"
                 android:hint="请输入您的账号"
                 android:singleLine="true" />
 
@@ -51,12 +51,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="3~20个字符，可使用字母、数字，需以字母开头"
+            android:text="3~20个字符，可使用字母、数字"
             android:textSize="12sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:gravity="center"
             android:orientation="horizontal">
@@ -69,10 +69,9 @@
 
             <EditText
                 android:id="@+id/register_name"
-                android:layout_width="219dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/edit"
                 android:hint="请输入您的名字"
                 android:singleLine="true" />
         </LinearLayout>
@@ -99,10 +98,9 @@
 
             <EditText
                 android:id="@+id/register_pw"
-                android:layout_width="219dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/edit"
                 android:hint="请输入您的密码"
                 android:inputType="textPassword"
                 android:singleLine="true" />
@@ -126,18 +124,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="密码确认：" />
+                android:text="密码：" />
 
             <EditText
                 android:id="@+id/register_pwcheck"
-                android:layout_width="248dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/edit"
-                android:hint="请再次输入您的密码"
+                android:hint="请再次输入密码"
                 android:inputType="textPassword"
                 android:singleLine="true" />
         </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="两次输入密码需保持一致"
+            android:textSize="12sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -148,10 +151,12 @@
 
             <Button
                 android:id="@+id/register_btn"
-                android:layout_width="163dp"
+                android:layout_width="192dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/btn_login"
-                android:text="注册" />
+                android:background="#50BAEA"
+                android:text="注册"
+                android:textColor="#ffffff"
+                android:textSize="20dp"/>
         </LinearLayout>
 
     </LinearLayout>

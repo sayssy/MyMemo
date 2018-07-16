@@ -3,8 +3,13 @@ package com.android.mymemo.activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -30,7 +35,34 @@ public class CloudBinActivity extends AppCompatActivity {
         setContentView(R.layout.activity_memo);
 
         getSupportActionBar().setTitle("云回收站");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        //搜索
+        EditText et_search = findViewById(R.id.memo_search_keyword);
+        et_search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                for (Memo memo : memos){
+                    if (TextUtils.isEmpty(s) || memo.getTitle().contains(s) || memo.getContent().contains(s)){
+                        memo.visible = true;
+                    }else{
+                        memo.visible = false;
+                    }
+                    memoAdapter.notifyDataSetChanged();
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
 
 
@@ -67,6 +99,10 @@ public class CloudBinActivity extends AppCompatActivity {
             }
         });
 
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
     }
 }
