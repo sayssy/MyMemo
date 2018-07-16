@@ -123,6 +123,13 @@ public class MemoActivity extends AppCompatActivity {
             }
         });
 
+        //检查是否有登陆
+        AccountDAOImpl adi = new AccountDAOImpl(this);
+        if (!adi.isExisted()) {
+            Intent intent = new Intent(MemoActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
 
 
 
@@ -154,13 +161,9 @@ public class MemoActivity extends AppCompatActivity {
                     }
                 }
                 show();
-            }else{
-                Intent intent = new Intent(MemoActivity.this,LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
             }
-
         }
+
         super.onResume();
     }
 
@@ -218,7 +221,8 @@ public class MemoActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.memo_menu_bin:
-                //TODO
+                Intent intent_cb = new Intent(MemoActivity.this,CloudBinActivity.class);
+                startActivity(intent_cb);
                 break;
             case R.id.memo_menu_logout:
                 adi.deleteAccountInfo();

@@ -141,7 +141,7 @@ public class MemoDAOImpl implements MemoDAO {
     public void setNotificationDate(String id, Date date) {
         SQLiteDatabase db = helper.getWritableDatabase();
         String sqlStatement= "update memo set notificationDate = ? where id = ?";
-        db.execSQL(sqlStatement,new Object[] {sdf.format(date.toString()), id});
+        db.execSQL(sqlStatement,new Object[] {sdf.format(date), id});
         db.close();
     }
 }

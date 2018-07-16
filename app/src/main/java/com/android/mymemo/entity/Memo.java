@@ -1,10 +1,11 @@
 package com.android.mymemo.entity;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class Memo {
+public class Memo implements Serializable{
     /**
      * state:
      * 0- not available

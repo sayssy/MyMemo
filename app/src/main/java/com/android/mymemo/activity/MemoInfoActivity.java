@@ -1,9 +1,11 @@
 package com.android.mymemo.activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.provider.AlarmClock;
 import android.support.constraint.Group;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.menu.MenuBuilder;
@@ -73,16 +75,28 @@ public class MemoInfoActivity extends AppCompatActivity {
         } else if (function.equals("update")){
             String memo_id = intent.getStringExtra("memo_id");
             MemoDAOImpl mdi = new MemoDAOImpl(this);
-            current_memo = mdi.getSingleMemo(memo_id);
-            et_title.setText(current_memo.getTitle());
-            tv_cd.setText(current_memo.getCreateDate().toLocaleString());
-            mPerformEdit.setDefaultText(current_memo.getContent());
-            tv_wc.setText(current_memo.getContent().length()+"");
 
+            current_memo = mdi.getSingleMemo(memo_id);
+            setInfo();
+
+        } else if (function.equals("cloud_bin_show")){
+
+
+            current_memo = (Memo)intent.getSerializableExtra("memo_obj");
+
+            setInfo();
+
+            et_title.setEnabled(false);
+            et_content.setEnabled(false);
         }
 
     }
-
+    private void setInfo(){
+        et_title.setText(current_memo.getTitle());
+        tv_cd.setText(current_memo.getCreateDate().toLocaleString());
+        mPerformEdit.setDefaultText(current_memo.getContent());
+        tv_wc.setText(current_memo.getContent().length()+"");
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -93,7 +107,18 @@ public class MemoInfoActivity extends AppCompatActivity {
             menu.findItem(R.id.menu_info_not).setVisible(false);
             menu.findItem(R.id.menu_info_del).setEnabled(false);
             menu.findItem(R.id.menu_info_not).setEnabled(false);
-        }else{
+        }else if (function.equals("cloud_bin_show")){
+            menu.findItem(R.id.menu_info_del).setVisible(false);
+            menu.findItem(R.id.menu_info_not).setVisible(false);
+            menu.findItem(R.id.menu_info_del).setEnabled(false);
+            menu.findItem(R.id.menu_info_not).setEnabled(false);
+            menu.findItem(R.id.action_redo).setVisible(false);
+            menu.findItem(R.id.action_redo).setEnabled(false);
+            menu.findItem(R.id.action_submit).setVisible(false);
+            menu.findItem(R.id.action_submit).setEnabled(false);
+            menu.findItem(R.id.action_undo).setVisible(false);
+            menu.findItem(R.id.action_undo).setEnabled(false);
+
             //menu.findItem(R.id.menu_info_group).setVisible(true);
         }
         return super.onCreateOptionsMenu(menu);
@@ -140,31 +165,27 @@ public class MemoInfoActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case R.id.menu_info_not:
-                mTimePickerDialog = new TimePickerDialog(this);
-                mTimePickerDialog.showDateAndTimePickerDialog(new TimePickerDialog.TimePickerDialogInterface() {
-                    @Override
-                    public void positiveListener() {
+                Date now = Calendar.getInstance().getTime();
+                Date nDate = current_memo.getNotificationDate();
+                if (now.before(nDate)){
+                    new AlertDialog.Builder(this)
+                            .setTitle("提示")
+                            .setMessage("是否要更新提醒时间？\n当前提醒时间为：\n"+nDate.toLocaleString())
+                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    setNDate();
+                                }
+                            })
+                            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
 
-                        int hour = mTimePickerDialog.getHour();
-                        int minute = mTimePickerDialog.getMinute();
-                        int year = mTimePickerDialog.getYear();
-                        int month = mTimePickerDialog.getMonth();
-                        int day = mTimePickerDialog.getDay();
-                        Calendar c = Calendar.getInstance();
-                        c.set(year,month-1,day,hour,minute,0);
-                        Date date = c.getTime();
-
-                            //TODO
-
-
-
-                    }
-
-                    @Override
-                    public void negativeListener() {
-
-                    }
-                });
+                                }
+                            }).show();
+                }else{
+                    setNDate();
+                }
                 break;
             case R.id.menu_info_del:
                 MemoDAOImpl mdi = new MemoDAOImpl(this);
@@ -178,6 +199,33 @@ public class MemoInfoActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    private void setNDate(){
+        mTimePickerDialog = new TimePickerDialog(this);
+        mTimePickerDialog.showDateAndTimePickerDialog(new TimePickerDialog.TimePickerDialogInterface() {
+            @Override
+            public void positiveListener() {
+
+                int hour = mTimePickerDialog.getHour();
+                int minute = mTimePickerDialog.getMinute();
+                int year = mTimePickerDialog.getYear();
+                int month = mTimePickerDialog.getMonth();
+                int day = mTimePickerDialog.getDay();
+                Calendar c = Calendar.getInstance();
+                c.set(year,month-1,day,hour,minute,0);
+                Date date = c.getTime();
+                current_memo.setNotificationDate(date);
+                MemoDAOImpl mdi = new MemoDAOImpl(MemoInfoActivity.this);
+                mdi.setNotificationDate(current_memo.getId(),date);
+
+            }
+
+            @Override
+            public void negativeListener() {
+
+            }
+        });
     }
 
     private boolean checkTitle(){
