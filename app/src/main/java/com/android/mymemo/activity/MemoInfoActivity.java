@@ -33,6 +33,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import ren.qinc.edit.PerformEdit;
 
@@ -219,17 +221,24 @@ public class MemoInfoActivity extends AppCompatActivity {
                 Calendar c = Calendar.getInstance();
                 c.set(year,month-1,day,hour,minute,0);
                 Date date = c.getTime();
-                current_memo.setNotificationDate(date);
-                MemoDAOImpl mdi = new MemoDAOImpl(MemoInfoActivity.this);
-                mdi.setNotificationDate(current_memo.getId(),date);
-                MemoActivity.updateData();
-
-                Intent intent_serv = new Intent(MemoInfoActivity.this, NtService.class);
-                startService(intent_serv);
                 Date now = Calendar.getInstance().getTime();
-                long tmp = (date.getTime() - now.getTime())/1000;
-                String duration = tmp / 1440 + "时" +(tmp / 60) % 60 + "分" + tmp % 60 + "秒";
-                Toast.makeText(MemoInfoActivity.this,"设置提醒成功\n将在"+ duration +"后提醒",Toast.LENGTH_SHORT).show();
+
+                if (date.after(now)) {
+
+                    current_memo.setNotificationDate(date);
+                    MemoDAOImpl mdi = new MemoDAOImpl(MemoInfoActivity.this);
+                    mdi.setNotificationDate(current_memo.getId(), date);
+                    MemoActivity.updateData();
+
+                    Intent intent_serv = new Intent(MemoInfoActivity.this, NtService.class);
+                    startService(intent_serv);
+
+                    long tmp = (date.getTime() - now.getTime()) / 1000;
+                    String duration = tmp / 1440 + "时" + (tmp / 60) % 60 + "分" + tmp % 60 + "秒";
+                    Toast.makeText(MemoInfoActivity.this, "设置提醒成功\n将在" + duration + "后提醒", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(MemoInfoActivity.this, "设置无效！提醒时间必须大于系统当前时间", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -243,7 +252,12 @@ public class MemoInfoActivity extends AppCompatActivity {
         String title = et_title.getText().toString();
         if (!TextUtils.isEmpty(title)){
             if (title.length() <= 20){
-                return true;
+                if (!isEmoji(title)){
+                    return true;
+                }else{
+                    Toast.makeText(MemoInfoActivity.this,"标题不能包含Emoji",Toast.LENGTH_SHORT).show();
+                    return false;
+                }
             }else{
                 Toast.makeText(MemoInfoActivity.this,"标题长度不能大于20",Toast.LENGTH_SHORT).show();
                 return false;
@@ -258,12 +272,22 @@ public class MemoInfoActivity extends AppCompatActivity {
         String content = et_content.getText().toString();
 
         if (content.length() <= 10000){
-            return true;
+            if (!isEmoji(content)){
+                return true;
+            }else{
+                Toast.makeText(MemoInfoActivity.this,"正文不能包含Emoji",Toast.LENGTH_SHORT).show();
+                return false;
+            }
         }else{
             Toast.makeText(MemoInfoActivity.this,"正文长度不能大于10000",Toast.LENGTH_SHORT).show();
             return false;
         }
 
+    }
+    private static boolean isEmoji(String content) {
+        Pattern pattern = Pattern.compile("[\ud83c\udc00-\ud83c\udfff]|[\ud83d\udc00-\ud83d\udfff]|[\u2600-\u27ff]", Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(content);
+        return matcher.find();
     }
 
 

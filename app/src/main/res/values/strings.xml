@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MyMemo</string>
+    <string name="app_name">云备忘录</string>
     <string name="title_activity_test">TestActivity</string>
     <string name="sortByM">按修改日期排序</string>
     <string name="sortByC">按创建日期排序</string>

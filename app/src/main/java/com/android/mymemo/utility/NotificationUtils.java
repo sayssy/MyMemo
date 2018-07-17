@@ -40,7 +40,7 @@ public class NotificationUtils extends ContextWrapper {
             channel.enableLights(true);
             channel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,Notification.AUDIO_ATTRIBUTES_DEFAULT);
             channel.setLightColor(Notification.COLOR_DEFAULT);
-            channel.setImportance(NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
             getManager().createNotificationChannel(channel);
         }
     }
@@ -73,7 +73,7 @@ public class NotificationUtils extends ContextWrapper {
     public void sendNotification(String title, String content,String memo_id){
         Intent intent = new Intent(this, MemoInfoActivity.class);
         intent.putExtra("function","update");
-        intent.putExtra("memo",memo_id);
+        intent.putExtra("memo_id",memo_id);
 
         PendingIntent pintent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
